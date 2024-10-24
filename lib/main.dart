@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, prefer_const_constructors
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
@@ -26,7 +27,7 @@ class FinalView extends StatefulWidget {
 class _FinalViewState extends State<FinalView> with TickerProviderStateMixin {
   late AnimationController controller;
   int inputMinutes = 0;
-  int inputSeconds = 11;
+  int inputSeconds = 30;
 
   String get timerString {
     Duration duration = controller.duration! * controller.value;
@@ -51,48 +52,37 @@ class _FinalViewState extends State<FinalView> with TickerProviderStateMixin {
   }
 
   void _showTimeInputDialog() {
-    int tempMinutes = inputMinutes;
-    int tempSeconds = inputSeconds;
+    Duration tempDuration = Duration(minutes: inputMinutes, seconds: inputSeconds);
 
-    showDialog(
+    showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Set Timer Duration"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+        return Container(
+          height: 300,
+          color: Colors.white,
+          child: Column(
             children: [
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "Enter minutes"),
-                onChanged: (value) {
-                  tempMinutes = int.tryParse(value) ?? inputMinutes;
-                },
+              SizedBox(
+                height: 200,
+                child: CupertinoTimerPicker(
+                  mode: CupertinoTimerPickerMode.ms,
+                  initialTimerDuration: tempDuration,
+                  onTimerDurationChanged: (Duration newDuration) {
+                    setState(() {
+                      tempDuration = newDuration;
+                    });
+                  },
+                ),
               ),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "Enter seconds"),
-                onChanged: (value) {
-                  tempSeconds = int.tryParse(value) ?? inputSeconds;
+              CupertinoButton(
+                child: Text("Set Time"),
+                onPressed: () {
+                  _updateTimer(tempDuration.inMinutes, tempDuration.inSeconds % 60);
+                  Navigator.of(context).pop();
                 },
-              ),
+              )
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                _updateTimer(tempMinutes, tempSeconds);
-                Navigator.of(context).pop();
-              },
-              child: Text("Set"),
-            ),
-          ],
         );
       },
     );
@@ -144,7 +134,7 @@ class _FinalViewState extends State<FinalView> with TickerProviderStateMixin {
                                 child: Padding(
                                   padding: const EdgeInsets.all(30.0),
                                   child: CircularProgressIndicator(
-                                    color: controller.value < 0.4821094
+                                    color: controller.value < 0.5
                                         ? Colors.deepPurpleAccent
                                         : Colors.white,
                                     backgroundColor: controller.isAnimating
@@ -163,7 +153,7 @@ class _FinalViewState extends State<FinalView> with TickerProviderStateMixin {
                                     timerString,
                                     style: TextStyle(
                                       fontSize: 112.0,
-                                      color: controller.value < 0.4821094
+                                      color: controller.value < 0.5
                                           ? Colors.deepPurpleAccent
                                           : Colors.white,
                                     ),
